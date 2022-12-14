@@ -1,58 +1,7 @@
-# aiolago
- Unofficial Asyncronous Python Client for Lago
-
-
- **Latest Version**: [![PyPI version](https://badge.fury.io/py/aiolago.svg)](https://badge.fury.io/py/aiolago)
-
- **[Official Client](https://github.com/getlago/lago-python-client)**
-
-## Features
-
-- Unified Asyncronous and Syncronous Python Client for [Lago](https://www.getlago.com/)
-- Supports Python 3.6+
-- Strongly Typed with [Pydantic](https://pydantic-docs.helpmanual.io/)
-- Includes Function Wrappers to quickly add to existing projects
-- Utilizes Environment Variables for Configuration
-
----
-
-## Installation
-
-```bash
-# Install from PyPI
-pip install aiolago
-
-# Install from source
-pip install git+https://github.com/GrowthEngineAI/aiolago.git
-```
-
-## Usage
-
-WIP - Simple Usage Example
-
-```python
 import asyncio
-from aiolago import Lago
+from client import Lago
 from aiolago.utils import logger
-
-"""
-Environment Vars that map to Lago.configure:
-all vars are prefixed with LAGO_
-
-LAGO_APIKEY (apikey): str
-LAGO_URL (url): str takes precedence over LAGO_SCHEME | LAGO_HOST | LAGO_PORT
-LAGO_SCHEME (scheme): str - defaults to 'http://'
-LAGO_HOST (host): str - defaults to None
-LAGO_PORT (port): int - defaults to 3000
-LAGO_APIPATH (api_path): str - defaults to '/api/v1'
-LAGO_TIMEOUT (timeout): int - defaults to 10
-LAGO_IGNORE_ERRORS (ignore_errors): bool = defaults to False
-"""
-
-Lago.configure(
-    apikey = '...',
-    url = '',
-)
+from aiolago import Charge, BillableMetricResponse, Plan
 
 
 customer_id = "gexai_demo"
@@ -63,17 +12,29 @@ metric_id = "demo_requests"
 plan_name = "Demo Plan"
 plan_id = "demo_plan"
 
-
 async def create_demo_customer():
     customer = await Lago.customers.async_create(
         external_id = customer_id,
+        address_line1 = "000 Growth Engine Ave.",
+        address_line2 = None,
+        city = "Houston",
+        currency = "USD",
+        country = "US",
         email = f"{customer_id}@growthengineai.com",
+        legal_name = "API Demo Customer",
+        legal_number = "00-000-000",
+        name = "API Demo User",
+        phone = "1-000-0000-0000",
+        state = "TX",
+        url = "https://growthengineai.com",
         billing_configuration = {
             "tax_rate": 8.25,
         },
+        zipcode = "77005",
     )
     logger.info(f'Created Customer: {customer}')
     return customer
+
 
 
 flat_rate = 0.021
@@ -192,5 +153,3 @@ async def run_test():
     plan = await create_plan()
 
 asyncio.run(run_test())
-
-```
