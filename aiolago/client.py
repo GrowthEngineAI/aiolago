@@ -162,7 +162,10 @@ class LagoClient:
         extra_properties: Optional[Dict] = None,
         extra_properties_func: Optional[Callable] = None,
         include_duration: Optional[bool] = False,
+
         include_results: Optional[bool] = True,
+        include_args_in_properties: Optional[bool] = False,
+        include_kwargs_in_properties: Optional[bool] = False,
         usage_callback: Optional[Callable] = None,
         **kwargs,
     ):
@@ -202,6 +205,12 @@ class LagoClient:
         a dictionary of extra properties to add to the event.
         
         :param include_duration: Whether to include the duration of the function in the event.
+        :param include_results: Whether to include the results of the function in the event.
+        :param include_args_in_properties: Whether to include the arguments of the function in
+        the properties of the event.
+        :param include_kwargs_in_properties: Whether to include the keyword arguments of the function in
+        the properties of the event.
+
         :param usage_callback: A function that is the final step of the event logging. 
         It should take all the arguments of the function and results of the function and
         return a dictionary of usage properties to log return to the event.
@@ -279,6 +288,12 @@ class LagoClient:
                     result = await func(*args, **kwargs)
                     if include_duration: event_properties['duration_s'] = timer(duration_s)
                     if include_results: event_properties['results'] = result
+
+                    # Handle including args and kwargs in properties
+                    if include_args_in_properties:
+                        event_properties['args'] = args
+                    if include_kwargs_in_properties:
+                        event_properties['kwargs'] = kwargs
                     
                     # validate/handle transaction_id
                     if transaction_id is None:
@@ -358,6 +373,12 @@ class LagoClient:
                     if include_duration: event_properties['duration_s'] = timer(duration_s)
                     if include_results: event_properties['results'] = result
                     
+                    # Handle including args and kwargs in properties
+                    if include_args_in_properties:
+                        event_properties['args'] = args
+                    if include_kwargs_in_properties:
+                        event_properties['kwargs'] = kwargs
+
                     # validate/handle transaction_id
                     if transaction_id is None:
                         _transaction_id = str(uuid.uuid4())
@@ -633,6 +654,9 @@ class LagoAPI:
         extra_properties_func: Optional[Callable] = None,
         include_duration: Optional[bool] = False,
         include_results: Optional[bool] = True,
+        include_args_in_properties: Optional[bool] = False,
+        include_kwargs_in_properties: Optional[bool] = False,
+
         usage_callback: Optional[Callable] = None,
         **kwargs,
     ):
@@ -672,6 +696,11 @@ class LagoAPI:
         a dictionary of extra properties to add to the event.
         
         :param include_duration: Whether to include the duration of the function in the event.
+        :param include_results: Whether to include the results of the function in the event.
+        :param include_args_in_properties: Whether to include the arguments of the function in
+        the properties of the event.
+        :param include_kwargs_in_properties: Whether to include the keyword arguments of the function in
+        the properties of the event.
         :param usage_callback: A function that is the final step of the event logging. 
         It should take all the arguments of the function and results of the function and
         return a dictionary of usage properties to log return to the event.
@@ -696,6 +725,8 @@ class LagoAPI:
             extra_properties_func=extra_properties_func,
             include_duration=include_duration,
             include_results=include_results,
+            include_args_in_properties=include_args_in_properties,
+            include_kwargs_in_properties=include_kwargs_in_properties,
             usage_callback=usage_callback,
             **kwargs,
         )

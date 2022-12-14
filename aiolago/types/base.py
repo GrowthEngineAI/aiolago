@@ -114,7 +114,6 @@ class BaseRoute(BaseModel):
         :param params: Optional Query Parameters
         """
         api_resource = f'{self.api_resource}/{resource_id}'
-        # api_response = self.client.get(
         api_response = self._send(
             method = 'GET',
             url = api_resource, 
@@ -140,7 +139,6 @@ class BaseRoute(BaseModel):
         :param params: Optional Query Parameters
         """
         api_resource = f'{self.api_resource}/{resource_id}'
-        # api_response = await self.client.async_get(
         api_response = await self._async_send(
             method = 'GET',
             url = api_resource, 
@@ -165,7 +163,6 @@ class BaseRoute(BaseModel):
         
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
-        # api_response = self.client.get(
         api_response = self._send(
             method = 'GET',
             url = self.api_resource,
@@ -190,7 +187,6 @@ class BaseRoute(BaseModel):
 
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
-        # api_response = await self.client.async_get(
         api_response = await self._async_send(
             method = 'GET',
             url = self.api_resource,
@@ -271,7 +267,6 @@ class BaseRoute(BaseModel):
         :param resource_id: The ID of the Resource to DELETE
         """
         api_resource = f'{self.api_resource}/{resource_id}'
-        # api_response = self.client.delete(
         api_response = self._send(
             method = 'DELETE',
             url = api_resource,
@@ -294,7 +289,6 @@ class BaseRoute(BaseModel):
         :param resource_id: The ID of the Resource to DELETE
         """
         api_resource = f'{self.api_resource}/{resource_id}'
-        # api_response = await self.client.async_delete(
         api_response = await self._async_send(
             method = 'DELETE',
             url = api_resource,
@@ -326,7 +320,6 @@ class BaseRoute(BaseModel):
             self.root_name: input_object.dict(exclude_none=True)
         }
         data = json.dumps(query_parameters, cls = ObjectEncoder)
-        # api_response = self.client.post(
         api_response = self._send(
             method = 'POST',
             url = self.api_resource,
@@ -394,7 +387,6 @@ class BaseRoute(BaseModel):
             self.root_name: input_object.dict()
         }
         data = json.dumps(query_parameters, cls = ObjectEncoder)
-        # api_response = self.client.post(
         api_response = self._send(
             method = 'POST',
             url = api_resource,
@@ -429,7 +421,6 @@ class BaseRoute(BaseModel):
             self.root_name: input_object.dict()
         }
         data = json.dumps(query_parameters)
-        # api_response = await self.client.async_post(
         api_response = await self._async_send(  
             method = 'POST',
             url = api_resource,
@@ -473,7 +464,6 @@ class BaseRoute(BaseModel):
             method = 'PUT',
             url = api_resource,
             data = data,
-            #params = query_parameters,
             headers = self.headers,
             timeout = self.timeout,
             **kwargs
@@ -651,7 +641,6 @@ class BaseRoute(BaseModel):
         if not self.download_enabled:
             raise NotImplementedError('Download is not enabled for this resource')
         api_resource = f'{self.api_resource}/{resource_id}/download'
-        #api_response = await self.client.async_post(
         api_response = await self._async_send(
             method = 'POST',
             url = api_resource, 
@@ -678,7 +667,6 @@ class BaseRoute(BaseModel):
         if not self.usage_enabled:
             raise NotImplementedError('Usage is not enabled for this resource')
         api_resource = f'{self.api_resource}/{resource_id}/current_usage'
-        #api_response = self.client.get(
         api_response = self._send(
             method = 'GET',
             url = api_resource, 
@@ -703,7 +691,6 @@ class BaseRoute(BaseModel):
         :param resource_id: The ID of the Resource to Get Usage For
         """
         api_resource = f'{self.api_resource}/{resource_id}/current_usage'
-        #api_response = await self.client.async_get(
         api_response = await self._async_send(
             method = 'GET',
             url = api_resource, 
