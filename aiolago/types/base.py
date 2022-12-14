@@ -10,7 +10,7 @@ from aiolago.utils.config import settings
 
 from aiolago.types.errors import APIError, fatal_exception
 
-from typing import Dict, Optional, Any, List, Type, Callable, Union
+from typing import Dict, Optional, Any, List, Type, Callable, Union, Tuple
 
 __all__ = [
     'BaseRoute',
@@ -25,6 +25,22 @@ RESPONSE_SUCCESS_CODES = [
     204
 ]
 
+VALID_SEND_KWARGS = [
+    'method',
+    'url',
+    'content',
+    'data',
+    'files',
+    'json',
+    'params',
+    'headers',
+    'cookies',
+    'auth',
+    'follow_redirects',
+    'timeout',
+    'extensions',
+]
+
 
 class BaseResource(BaseModel):
 
@@ -34,6 +50,23 @@ class BaseResource(BaseModel):
             return self.lago_id
 
         return self.id if hasattr(self, 'id') else None
+    
+
+    @staticmethod
+    def create_resource(
+        resource: Type['BaseResource'],
+        **kwargs
+    ) -> Tuple[Type['BaseResource'], Dict]:
+        """
+        Extracts the resource from the kwargs and returns the resource 
+        and the remaining kwargs
+        """
+        resource_fields = [field.name for field in resource.__fields__.values()]
+        resource_kwargs = {k: v for k, v in kwargs.items() if k in resource_fields}
+        return_kwargs = {k: v for k, v in kwargs.items() if k not in resource_fields and k in VALID_SEND_KWARGS}
+        resource_obj = resource.parse_obj(resource_kwargs)
+        logger.info(f'Created Resource: {resource_obj} | {return_kwargs}')
+        return resource_obj, return_kwargs
         
 
 
@@ -68,67 +101,6 @@ class BaseRoute(BaseModel):
     def usage_enabled(self):
         return False
     
-    def _send(
-        self,
-        method: str,
-        url: str,
-        params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
-        # ignore_errors: Optional[bool] = None,
-        timeout: Optional[int] = None,
-        retries: Optional[int] = None,
-        **kwargs
-    ) -> aiohttpx.Response:
-        # if ignore_errors is None: ignore_errors = self.ignore_errors
-        if retries is None: retries = settings.max_retries
-        if timeout is None: timeout = self.timeout
-        @backoff.on_exception(
-            backoff.expo, Exception, max_tries = retries + 1, giveup = fatal_exception
-        )
-        def _retryable_send():
-            return self.client.request(
-                method = method,
-                url = url,
-                params = params,
-                data = data,
-                headers = headers,
-                timeout = timeout,
-                **kwargs
-            )
-        return _retryable_send()
-    
-    async def _async_send(
-        self,
-        method: str,
-        url: str,
-        params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
-        # ignore_errors: Optional[bool] = None,
-        timeout: Optional[int] = None,
-        retries: Optional[int] = None,
-        **kwargs
-    ) -> aiohttpx.Response:
-        # if ignore_errors is None: ignore_errors = self.ignore_errors
-        if retries is None: retries = settings.max_retries
-        if timeout is None: timeout = self.timeout
-        @backoff.on_exception(
-            backoff.expo, Exception, max_tries = retries + 1, giveup = fatal_exception
-        )
-        async def _retryable_async_send():
-            return await self.client.async_request(
-                method = method,
-                url = url,
-                params = params,
-                data = data,
-                headers = headers,
-                timeout = timeout,
-                **kwargs
-            )
-        return await _retryable_async_send()
-
-
     def find(
         self, 
         resource_id: str, 
@@ -344,9 +316,11 @@ class BaseRoute(BaseModel):
 
         :param input_object: Input Object to Create
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
         
         query_parameters = {
             self.root_name: input_object.dict(exclude_none=True)
@@ -375,15 +349,16 @@ class BaseRoute(BaseModel):
 
         :param input_object: Input Object to Create
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
-        
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
+
         query_parameters = {
             self.root_name: input_object.dict()
         }
         data = json.dumps(query_parameters, cls = ObjectEncoder)
-        # api_response = await self.client.async_post(
         api_response = await self._async_send(
             method = 'POST',
             url = self.api_resource,
@@ -408,9 +383,11 @@ class BaseRoute(BaseModel):
         :param input_object: Input Object to Create
         :param return_response: Return the Response Object
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
 
         api_resource = f'{self.api_resource}/batch'
         query_parameters = {
@@ -441,9 +418,11 @@ class BaseRoute(BaseModel):
         :param input_object: Input Object to Create
         :param return_response: Return the Response Object
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
 
         api_resource = f'{self.api_resource}/batch'
         query_parameters = {
@@ -466,29 +445,30 @@ class BaseRoute(BaseModel):
     def update(
         self, 
         input_object: Optional[Type[BaseResource]] = None,
-        identifier: str = None,
+        resource_id: str = None,
         **kwargs
     ):
         """
         Update a Resource
 
         :param input_object: Input Object to Update
-        :param identifier: The ID of the Resource to Update
+        :param resource_id: The ID of the Resource to Update
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
         
         api_resource = self.api_resource
-        #identifier = identifier or getattr(input_object, 'code', None)
-        if identifier is not None:
-            api_resource = f'{api_resource}/{identifier}'
+        resource_id = resource_id or input_object.resource_id
+        if resource_id is not None:
+            api_resource = f'{api_resource}/{resource_id}'
 
         query_parameters = {
             self.root_name: input_object.dict(exclude_none = True)
         }
         data = json.dumps(query_parameters, cls = ObjectEncoder)
-        # api_response = self.client.put(
         api_response = self._send(
             method = 'PUT',
             url = api_resource,
@@ -504,29 +484,31 @@ class BaseRoute(BaseModel):
     async def async_update(
         self, 
         input_object: Optional[Type[BaseResource]] = None,
-        identifier: str = None,
+        resource_id: str = None,
         **kwargs
     ):
         """
         Update a Resource
 
         :param input_object: Input Object to Update
-        :param identifier: The ID of the Resource to Update
+        :param resource_id: The ID of the Resource to Update
         """
-        if input_object is None: 
-            input_object = self.input_model.parse_obj(kwargs)
-            kwargs = {}
+        if input_object is None:
+            input_object, kwargs = self.input_model.create_resource(
+                resource = self.input_model,
+                **kwargs
+            )
         
         input_object = input_object or self.input_model
         api_resource = self.api_resource
-        #identifier = identifier or getattr(input_object, 'code', None)
-        if identifier is not None:
-            api_resource = f'{api_resource}/{identifier}'
+        resource_id = resource_id or input_object.resource_id
+
+        if resource_id is not None:
+            api_resource = f'{api_resource}/{resource_id}'
         query_parameters = {
             self.root_name: input_object.dict(exclude_none = True)
         }
         data = json.dumps(query_parameters, cls = ObjectEncoder)
-        # api_response = await self.client.async_put(
         api_response = await self._async_send(
             method = 'PUT',
             url = api_resource,
@@ -646,7 +628,6 @@ class BaseRoute(BaseModel):
             raise NotImplementedError('Download is not enabled for this resource')
         
         api_resource = f'{self.api_resource}/{resource_id}/download'
-        # api_response = self.client.post(
         api_response = self._send(
             method = 'POST',
             url = api_resource, 
@@ -798,6 +779,65 @@ class BaseRoute(BaseModel):
         }
 
 
+    def _send(
+        self,
+        method: str,
+        url: str,
+        params: Optional[Dict[str, Any]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        # ignore_errors: Optional[bool] = None,
+        timeout: Optional[int] = None,
+        retries: Optional[int] = None,
+        **kwargs
+    ) -> aiohttpx.Response:
+        # if ignore_errors is None: ignore_errors = self.ignore_errors
+        if retries is None: retries = settings.max_retries
+        if timeout is None: timeout = self.timeout
+        @backoff.on_exception(
+            backoff.expo, Exception, max_tries = retries + 1, giveup = fatal_exception
+        )
+        def _retryable_send():
+            return self.client.request(
+                method = method,
+                url = url,
+                params = params,
+                data = data,
+                headers = headers,
+                timeout = timeout,
+                **kwargs
+            )
+        return _retryable_send()
+    
+    async def _async_send(
+        self,
+        method: str,
+        url: str,
+        params: Optional[Dict[str, Any]] = None,
+        data: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        # ignore_errors: Optional[bool] = None,
+        timeout: Optional[int] = None,
+        retries: Optional[int] = None,
+        **kwargs
+    ) -> aiohttpx.Response:
+        # if ignore_errors is None: ignore_errors = self.ignore_errors
+        if retries is None: retries = settings.max_retries
+        if timeout is None: timeout = self.timeout
+        @backoff.on_exception(
+            backoff.expo, Exception, max_tries = retries + 1, giveup = fatal_exception
+        )
+        async def _retryable_async_send():
+            return await self.client.async_request(
+                method = method,
+                url = url,
+                params = params,
+                data = data,
+                headers = headers,
+                timeout = timeout,
+                **kwargs
+            )
+        return await _retryable_async_send()
 
 
 
