@@ -155,13 +155,13 @@ class BaseRoute(BaseModel):
 
     def find_all(
         self, 
-        options: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
-        :param options: Optional Query Parameters
+        :param params: Optional Query Parameters
         
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
@@ -169,7 +169,7 @@ class BaseRoute(BaseModel):
         api_response = self._send(
             method = 'GET',
             url = self.api_resource,
-            params = options,
+            params = params,
             headers = self.headers,
             timeout = self.timeout,
             **kwargs
@@ -180,13 +180,13 @@ class BaseRoute(BaseModel):
 
     async def async_find_all(
         self, 
-        options: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
-        :param options: Optional Query Parameters
+        :param params: Optional Query Parameters
 
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
@@ -194,7 +194,7 @@ class BaseRoute(BaseModel):
         api_response = await self._async_send(
             method = 'GET',
             url = self.api_resource,
-            params = options,
+            params = params,
             headers = self.headers,
             timeout = self.timeout,
             **kwargs
@@ -233,31 +233,31 @@ class BaseRoute(BaseModel):
 
     def get_all(
         self,
-        options: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
-        :param options: Optional Query Parameters
+        :param params: Optional Query Parameters
 
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
-        return self.find_all(options = options, **kwargs)
+        return self.find_all(params = params, **kwargs)
     
     async def async_get_all(
         self,
-        options: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
-        :param options: Optional Query Parameters
+        :param params: Optional Query Parameters
         
         :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
         """
-        return await self.async_find_all(options = options, **kwargs)    
+        return await self.async_find_all(params = params, **kwargs)    
 
 
     def destroy(
