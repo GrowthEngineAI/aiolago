@@ -1,7 +1,7 @@
 from aiolago import Lago
 
 Lago.configure(
-    apikey = '...',
+    api_key = '...',
     url = '',
     debug_enabled = True,
 )

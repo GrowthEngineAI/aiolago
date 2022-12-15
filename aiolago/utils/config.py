@@ -11,10 +11,10 @@ class LagoSettings(BaseSettings):
     host: Optional[str] = None
     port: Optional[int] = 3000
     
-    apikey: Optional[str] = None
-    apipath: Optional[str] = '/api/v1/'
+    api_key: Optional[str] = None
+    api_path: Optional[str] = '/api/v1/'
 
-    apikey_header: Optional[str] = None
+    api_key_header: Optional[str] = None
     organization_id: Optional[str] = None
 
     ignore_errors: Optional[bool] = False
@@ -41,38 +41,38 @@ class LagoSettings(BaseSettings):
     
     @lazyproperty
     def base_url(self) -> str:
-        if self.apipath:
+        if self.api_path:
             from urllib.parse import urljoin
-            return urljoin(self.api_url, self.apipath)
+            return urljoin(self.api_url, self.api_path)
         return self.api_url
     
     @lazyproperty
     def headers(self):
         _headers = {"Content-Type": "application/json", "User-Agent": f"aiolago/{VERSION}"}
-        if self.apikey: 
-            if self.apikey_header:
-                _headers[self.apikey_header] = self.apikey
+        if self.api_key: 
+            if self.api_key_header:
+                _headers[self.api_key_header] = self.api_key
             else:
-                _headers['Authorization'] = f'Bearer {self.apikey}'
+                _headers['Authorization'] = f'Bearer {self.api_key}'
         return _headers
 
 
     def get_headers(
         self, 
-        apikey: Optional[str] = None, 
-        apikey_header: Optional[str] = None, 
+        api_key: Optional[str] = None, 
+        api_key_header: Optional[str] = None, 
         **kwargs
     ) -> Dict[str, str]:
 
         headers = self.headers.copy()
         if kwargs: headers.update(**kwargs)
-        apikey_header = apikey_header if apikey_header is not None else self.apikey_header
-        apikey = apikey if apikey is not None else self.apikey
-        if apikey:
-            if apikey_header:
-                headers[apikey_header] = apikey
+        api_key_header = api_key_header if api_key_header is not None else self.api_key_header
+        api_key = api_key if api_key is not None else self.api_key
+        if api_key:
+            if api_key_header:
+                headers[api_key_header] = api_key
             else:
-                headers['Authorization'] = f'Bearer {apikey}'
+                headers['Authorization'] = f'Bearer {api_key}'
         return headers
 
     def get_api_url(
@@ -96,7 +96,7 @@ class LagoSettings(BaseSettings):
         port: Optional[int] = None, 
         scheme: Optional[str] = None, 
         url: Optional[str] = None,
-        apipath: Optional[str] = None,
+        api_path: Optional[str] = None,
         **kwargs
     ) -> str:
         api_url = self.get_api_url(
@@ -105,10 +105,61 @@ class LagoSettings(BaseSettings):
             scheme=scheme,
             url=url,
         )
-        apipath = apipath or self.apipath
-        if apipath:
+        api_path = api_path or self.api_path
+        if api_path:
             from urllib.parse import urljoin
-            return urljoin(api_url, apipath)
+            return urljoin(api_url, api_path)
         return api_url
+    
+    def configure(
+        self,
+        url: Optional[str] = None,
+        scheme: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        api_key: Optional[str] = None,
+        api_path: Optional[str] = None,
+        api_key_header: Optional[str] = None,
+        organization_id: Optional[str] = None,
+        ignore_errors: Optional[bool] = None,
+        debug_enabled: Optional[bool] = None,
+        timeout: Optional[int] = None,
+        max_retries: Optional[int] = None,
+        **kwargs,
+    ):
+        """
+        Configure the Lago API client.
+
+        :param url: The Lago API URL.
+        :param scheme: The Lago API scheme.
+        :param host: The Lago API host.
+        :param port: The Lago API port.
+        :param api_key: The Lago API key.
+        :param api_path: The Lago API path.
+        :param api_key_header: The Lago API key header.
+        :param organization_id: The Lago organization ID.
+        :param ignore_errors: Ignore Lago API errors.
+        :param debug_enabled: Enable debug mode.
+        :param timeout: Timeout in seconds.
+        :param max_retries: Maximum number of retries.
+        """
+        if url is not None: self.url = url
+        if scheme is not None: self.scheme = scheme
+        if host is not None: self.host = host
+        if port is not None: self.port = port
+        if api_key is not None: self.api_key = api_key
+        if api_path is not None: self.api_path = api_path
+        if api_key_header is not None: self.api_key_header = api_key_header
+        if organization_id is not None: self.organization_id = organization_id
+        if ignore_errors is not None: self.ignore_errors = ignore_errors
+        if debug_enabled is not None: self.debug_enabled = debug_enabled
+        if timeout is not None: self.timeout = timeout
+        if max_retries is not None: self.max_retries = max_retries
+        if kwargs:
+            for key, value in kwargs.items():
+                if hasattr(self, key):
+                    setattr(self, key, value)
+
+
 
 settings = LagoSettings()

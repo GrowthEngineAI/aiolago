@@ -1,11 +1,7 @@
 
 
-import numbers
 import inspect
-from datetime import date, datetime, timedelta
-
-from typing import Union
-from aiolago.utils.logs import logger
+from datetime import datetime, timedelta
 
 __all__ = [
     'is_naive',

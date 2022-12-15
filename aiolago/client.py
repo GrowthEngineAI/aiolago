@@ -9,7 +9,9 @@ from lazyops.types import lazyproperty
 from lazyops.utils import is_coro_func, timer
 from aiolago.schemas import *
 from aiolago.utils.logs import logger
-from aiolago.utils.config import settings
+from aiolago.utils.config import LagoSettings
+from aiolago.utils.config import settings as lago_settings
+
 from aiolago.utils.helpers import full_name
 from aiolago.routes import ApiRoutes
 
@@ -21,30 +23,31 @@ class LagoClient:
 
     def __init__(
         self,
-        apikey: Optional[str] = None,
+        api_key: Optional[str] = None,
         url: Optional[str] = None,
         scheme: Optional[str] = None,
         host: Optional[str] = None,
         port: Optional[int] = None,
-        apipath: Optional[str] = None,
+        api_path: Optional[str] = None,
         headers: Optional[Dict] = None,
         debug_enabled: Optional[bool] = None,
         on_error: Optional[Callable] = None,
         timeout: Optional[int] = None,
-        apikey_header: Optional[str] = None,
+        api_key_header: Optional[str] = None,
         ignore_errors: Optional[bool] = None,
         **kwargs
     ):
-        self.apikey = apikey if apikey is not None else settings.apikey
-        self.api_url = settings.get_api_url(host = host, port = port, scheme = scheme, url = url)
-        self.base_url = settings.get_base_api_url(host = host, port = port, scheme = scheme, url = url, apipath = apipath)
-        self.debug_enabled = debug_enabled if debug_enabled is not None else settings.debug_enabled
+
+        self.api_key = api_key if api_key is not None else lago_settings.api_key
+        self.api_url = lago_settings.get_api_url(host = host, port = port, scheme = scheme, url = url)
+        self.base_url = lago_settings.get_base_api_url(host = host, port = port, scheme = scheme, url = url, api_path = api_path)
+        self.debug_enabled = debug_enabled if debug_enabled is not None else lago_settings.debug_enabled
         
-        self.timeout = timeout if timeout is not None else settings.timeout
-        self.headers = headers if headers is not None else settings.get_headers(apikey = self.apikey, apikey_header = apikey_header)
+        self.timeout = timeout if timeout is not None else lago_settings.timeout
+        self.headers = headers if headers is not None else lago_settings.get_headers(api_key = self.api_key, api_key_header = api_key_header)
 
         self.on_error = on_error
-        self.ignore_errors = ignore_errors if ignore_errors is not None else settings.ignore_errors
+        self.ignore_errors = ignore_errors if ignore_errors is not None else lago_settings.ignore_errors
         self._kwargs = kwargs
         self.log_method = logger.info if self.debug_enabled else logger.debug
         self.client = aiohttpx.Client(
@@ -411,20 +414,7 @@ class LagoClient:
 
 class LagoAPI:
 
-    apikey: Optional[str] = None
-    url: Optional[str] = None
-    scheme: Optional[str] = None
-    host: Optional[str] = None
-    port: Optional[int] = None
-    apipath: Optional[str] = None
-
-    debug_enabled: Optional[bool] = None
-    on_error: Optional[Callable] = None
-    timeout: Optional[int] = None
-    apikey_header: Optional[str] = None
-    ignore_errors: Optional[bool] = None
-
-    headers: Optional[Dict] = None
+    settings: Optional[LagoSettings] = lago_settings
     _api: Optional[LagoClient] = None
 
     """
@@ -433,17 +423,17 @@ class LagoAPI:
 
     def configure(
         self, 
-        apikey: Optional[str] = None,
+        api_key: Optional[str] = None,
         url: Optional[str] = None,
         scheme: Optional[str] = None,
         host: Optional[str] = None,
         port: Optional[int] = None,
-        apipath: Optional[str] = None,
+        api_path: Optional[str] = None,
 
         debug_enabled: Optional[bool] = None,
         on_error: Optional[Callable] = None,
         timeout: Optional[int] = None,
-        apikey_header: Optional[str] = None,
+        api_key_header: Optional[str] = None,
         ignore_errors: Optional[bool] = None,
 
         reset: Optional[bool] = None,
@@ -452,18 +442,20 @@ class LagoAPI:
         """
         Configure the global Lago client.
         """
-        if apikey is not None: self.apikey = apikey
-        if url is not None: self.url = url
-        if scheme is not None: self.scheme = scheme
-        if host is not None: self.host = host
-        if port is not None: self.port = port
-        if apipath is not None: self.apipath = apipath
-
-        if debug_enabled is not None: self.debug_enabled = debug_enabled
-        if on_error is not None: self.on_error = on_error
-        if timeout is not None: self.timeout = timeout
-        if apikey_header is not None: self.apikey_header = apikey_header
-        if ignore_errors is not None: self.ignore_errors = ignore_errors
+        self.settings.configure(
+            api_key=api_key,
+            url=url,
+            scheme=scheme,
+            host=host,
+            port=port,
+            api_path=api_path,
+            debug_enabled=debug_enabled,
+            on_error=on_error,
+            timeout=timeout,
+            api_key_header=api_key_header,
+            ignore_errors=ignore_errors,
+            **kwargs
+        )
 
         if reset: self._api = None
         if self._api is None:
@@ -471,24 +463,7 @@ class LagoAPI:
     
     def get_api(self, **kwargs) -> LagoClient:
         if self._api is None:
-            self.headers = settings.get_headers(
-                apikey = self.apikey,
-                apikey_header = self.apikey_header,
-            )
-            self._api = LagoClient(
-                apikey = self.apikey,
-                url = self.url,
-                scheme = self.scheme,
-                host = self.host,
-                port = self.port,
-                debug_enabled = self.debug_enabled,
-                on_error = self.on_error,
-                timeout = self.timeout,
-                apikey_header = self.apikey_header,
-                ignore_errors = self.ignore_errors,
-                headers = self.headers,
-                **kwargs
-            )
+            self._api = LagoClient(**kwargs)
         return self._api
     
     @property
@@ -754,7 +729,6 @@ class LagoAPI:
     
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.async_close()
-
 
 
     
