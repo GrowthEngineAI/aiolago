@@ -1,4 +1,4 @@
-from typing import Optional, Type, List, Union
+from typing import Optional, Type, List, Union, Dict, Any
 from aiolago.types.base import BaseRoute, BaseResource, lazyproperty
 
 __all__ = [
@@ -17,7 +17,7 @@ class Charge(BaseResource):
     lago_billable_metric_id: Optional[str]
     charge_model: Optional[str]
     properties: Optional[Union[dict, list]]
-    group_properties: Optional[Union[dict, list]]
+    group_properties: Optional[Union[List[Any], Dict]]
 
 class Charges(BaseResource):
     __root__: List[Charge] = []
@@ -32,7 +32,7 @@ class Plan(BaseResource):
     trial_period: Optional[float]
     pay_in_advance: Optional[bool]
     bill_charges_monthly: Optional[bool]
-    charges: Optional[Charges] = Charges()
+    charges: Optional[Union[List[Charge], Charges]] = Charges()
     
     def add_charge_to_plan(self, charge: Charge):
         """

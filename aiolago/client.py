@@ -35,19 +35,20 @@ class LagoClient:
         timeout: Optional[int] = None,
         api_key_header: Optional[str] = None,
         ignore_errors: Optional[bool] = None,
+        settings: Optional[LagoSettings] = None,
         **kwargs
     ):
+        settings = settings or lago_settings
 
-        self.api_key = api_key if api_key is not None else lago_settings.api_key
-        self.api_url = lago_settings.get_api_url(host = host, port = port, scheme = scheme, url = url)
-        self.base_url = lago_settings.get_base_api_url(host = host, port = port, scheme = scheme, url = url, api_path = api_path)
+        self.api_key = api_key if api_key is not None else settings.api_key
+        self.api_url = settings.get_api_url(host = host, port = port, scheme = scheme, url = url)
+        self.base_url = settings.get_base_api_url(host = host, port = port, scheme = scheme, url = url, api_path = api_path)
         self.debug_enabled = debug_enabled if debug_enabled is not None else lago_settings.debug_enabled
         
-        self.timeout = timeout if timeout is not None else lago_settings.timeout
-        self.headers = headers if headers is not None else lago_settings.get_headers(api_key = self.api_key, api_key_header = api_key_header)
-
+        self.timeout = timeout if timeout is not None else settings.timeout
+        self.headers = headers if headers is not None else settings.get_headers(api_key = self.api_key, api_key_header = api_key_header)
         self.on_error = on_error
-        self.ignore_errors = ignore_errors if ignore_errors is not None else lago_settings.ignore_errors
+        self.ignore_errors = ignore_errors if ignore_errors is not None else settings.ignore_errors
         self._kwargs = kwargs
         self.log_method = logger.info if self.debug_enabled else logger.debug
         self.client = aiohttpx.Client(
@@ -436,7 +437,7 @@ class LagoAPI:
         api_key_header: Optional[str] = None,
         ignore_errors: Optional[bool] = None,
 
-        reset: Optional[bool] = None,
+        reset: Optional[bool] = True,
         **kwargs
     ):
         """
@@ -463,7 +464,7 @@ class LagoAPI:
     
     def get_api(self, **kwargs) -> LagoClient:
         if self._api is None:
-            self._api = LagoClient(**kwargs)
+            self._api = LagoClient(settings = self.settings, **kwargs)
         return self._api
     
     @property

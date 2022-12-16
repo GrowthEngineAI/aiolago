@@ -7,7 +7,7 @@ from aiolago.types.errors import (
 
 from aiolago.schemas.applied_add_on import AppliedAddOn, AppliedAddOnResponse
 from aiolago.schemas.applied_coupon import AppliedCoupon, AppliedCouponResponse
-from aiolago.schemas.billable_metric import BillableMetric, BillableMetricResponse
+from aiolago.schemas.billable_metric import BillableMetric, BillableMetricResponse, MetricGroup, MetricGroupResponse
 from aiolago.schemas.coupon import Coupon, CouponResponse
 from aiolago.schemas.plan import Plan, Charges, Charge, PlanResponse
 from aiolago.schemas.add_on import AddOn, AddOnResponse

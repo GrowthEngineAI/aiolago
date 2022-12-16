@@ -1,5 +1,9 @@
 ## aiolago Changelogs
 
+- 0.0.4 (2022-12-15)
+  - Add support for `metric_groups` querying
+  - Resolve some issues with billable metrics
+
 - 0.0.3 (2022-12-15)
   - Reconfigure how configuration and initialization work
   - change some params to be more consistent
