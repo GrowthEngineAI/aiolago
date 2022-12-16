@@ -39,18 +39,18 @@ from aiolago.utils import logger
 Environment Vars that map to Lago.configure:
 all vars are prefixed with LAGO_
 
-LAGO_APIKEY (apikey): str
+LAGO_API_KEY (apikey): str
 LAGO_URL (url): str takes precedence over LAGO_SCHEME | LAGO_HOST | LAGO_PORT
 LAGO_SCHEME (scheme): str - defaults to 'http://'
 LAGO_HOST (host): str - defaults to None
 LAGO_PORT (port): int - defaults to 3000
-LAGO_APIPATH (api_path): str - defaults to '/api/v1'
+LAGO_API_PATH (api_path): str - defaults to '/api/v1'
 LAGO_TIMEOUT (timeout): int - defaults to 10
 LAGO_IGNORE_ERRORS (ignore_errors): bool = defaults to False
 """
 
 Lago.configure(
-    apikey = '...',
+    api_key = '...',
     url = '',
 )
 

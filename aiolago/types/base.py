@@ -3,6 +3,7 @@ import aiohttpx
 import backoff
 
 from lazyops.types import BaseModel, Field, lazyproperty
+from lazyops.types.formatting import to_camel_case
 from lazyops.utils import ObjectEncoder
 
 from aiolago.utils.logs import logger
@@ -69,6 +70,101 @@ class BaseResource(BaseModel):
         return resource_obj, return_kwargs
         
 
+class BaseGraphQLQuery(BaseModel):
+
+    resource_name: Optional[str] = ""
+
+    @lazyproperty
+    def get_operation(self):
+        """
+        Returns the operation name for a single
+        resource
+        """
+        return to_camel_case(
+            f"get_single_{self.resource_name}"
+        )
+    
+    @lazyproperty
+    def create_operation(self):
+        """
+        Returns the operation name for a single
+        resource
+        """
+        return to_camel_case(
+            f"create_{self.resource_name}"
+        )
+    
+    @lazyproperty
+    def update_operation(self):
+        """
+        Returns the operation name for a single
+        resource
+        """
+        return to_camel_case(
+            f"update_{self.resource_name}"
+        )
+
+    @lazyproperty
+    def delete_operation(self):
+        """
+        Returns the operation name for a single
+        resource
+        """
+        return to_camel_case(
+            f"destroy_{self.resource_name}"
+        )
+    
+    @lazyproperty
+    def list_operation(self):
+        """
+        Returns the operation name for a list
+        """
+        return to_camel_case(self.resource_name)
+    
+    def get_operation_name(
+        self,
+        operation: str
+    ) -> Tuple[str, str]:
+        if operation in {"get", "find"}:
+            return "query", self.get_operation
+        if operation in {"get_all", "find_all", "list", "list_all"}:
+            return "query", self.list_operation
+        if operation in {"create", "new"}:
+            return "mutation", self.create_operation
+        if operation in {"update"}:
+            return "mutation", self.update_operation
+        if operation in {"destroy", "delete"}:
+            return "mutation", self.delete_operation
+        raise APIError(
+            f"Invalid operation: {operation}"
+        )
+
+    def build_graphql_query(
+        self,
+        operation: str,
+        resource: Type['BaseResource'],
+        **kwargs
+    ):
+        """
+        Construct the graphql query
+        for a given operation
+
+        - WIP
+        """
+        query_type, operation_name = self.get_operation_name(
+            operation = operation
+        )
+        query = f"""
+{query_type} {operation_name}
+"""
+        return query
+
+
+
+
+    
+
+
 
 class BaseRoute(BaseModel):
     client: aiohttpx.Client
@@ -100,6 +196,13 @@ class BaseRoute(BaseModel):
     @lazyproperty
     def usage_enabled(self):
         return False
+    
+    @lazyproperty
+    def gql(self) -> Type[BaseGraphQLQuery]:
+        return BaseGraphQLQuery(
+            resource_name = self.api_resource
+        )
+
     
     def find(
         self, 
