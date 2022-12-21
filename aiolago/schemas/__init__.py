@@ -10,7 +10,7 @@ from aiolago.schemas.organization import Organization, OrganizationResponse
 from aiolago.schemas.event import Event, BatchEvent, EventResponse
 from aiolago.schemas.customer import Metric, ChargeObject, ChargeUsage, CustomerUsageResponse, Customer, BillingConfiguration, CustomerResponse
 from aiolago.schemas.invoice import InvoiceStatusChange, InvoiceResponse
-from aiolago.schemas.subscription import Subscription, SubscriptionResponse
+from aiolago.schemas.subscription import Subscription, SubscriptionResponse, SubscriptionUsageResponse
 from aiolago.schemas.wallet import Wallet, WalletResponse
 from aiolago.schemas.wallet_transaction import WalletTransaction, WalletTransactionResponse
 

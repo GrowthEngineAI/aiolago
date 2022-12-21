@@ -1,5 +1,8 @@
 ## aiolago Changelogs
 
+- 0.0.5 (2022-12-20)
+  - Added better resolve for `subscriptions`
+
 - 0.0.4 (2022-12-15)
   - Add support for `metric_groups` querying
   - Resolve some issues with billable metrics
