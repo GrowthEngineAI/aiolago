@@ -66,7 +66,7 @@ class BaseResource(BaseModel):
         resource_kwargs = {k: v for k, v in kwargs.items() if k in resource_fields}
         return_kwargs = {k: v for k, v in kwargs.items() if k not in resource_fields and k in VALID_SEND_KWARGS}
         resource_obj = resource.parse_obj(resource_kwargs)
-        logger.info(f'Created Resource: {resource_obj} | {return_kwargs}')
+        if settings.debug_enabled: logger.info(f'Created Resource: {resource_obj} | {return_kwargs}')
         return resource_obj, return_kwargs
         
 
@@ -203,7 +203,6 @@ class BaseRoute(BaseModel):
             resource_name = self.api_resource
         )
 
-    
     def find(
         self, 
         resource_id: str, 

@@ -24,12 +24,20 @@ class ChargeObject(BaseResource):
     charge_model: str
 
 
+class ChargeGroup(BaseResource):
+    key: Optional[str] = None
+    units: Optional[float] = None
+    value: Optional[str] = None
+    lago_id: Optional[str] = None
+    amount_cents: Optional[float] = None
+
 class ChargeUsage(BaseResource):
     units: float
     amount_cents: int
     amount_currency: str
     charge: ChargeObject
     billable_metric: Metric
+    groups: Optional[List[ChargeGroup]] = None
 
 
 class CustomerUsageResponse(BaseResource):
@@ -111,4 +119,3 @@ class CustomerRoute(BaseRoute):
        return True
     
 
-    

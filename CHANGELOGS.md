@@ -1,5 +1,8 @@
 ## aiolago Changelogs
 
+- 0.0.6 (2022-12-21)
+  - Resolve some schema issues in `customers`
+
 - 0.0.5 (2022-12-20)
   - Added better resolve for `subscriptions`
 
