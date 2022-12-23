@@ -1,3 +1,4 @@
+import time
 import uuid
 from typing import Optional, Type, List
 from aiolago.types.base import BaseRoute, BaseResource, lazyproperty, Field
@@ -16,7 +17,7 @@ class Event(BaseResource):
     external_customer_id: Optional[str]
     external_subscription_id: Optional[str]
     code: str
-    timestamp: Optional[int]
+    timestamp: Optional[int] = Field(default_factory = time.time)
     properties: Optional[dict]
 
 
