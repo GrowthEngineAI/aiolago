@@ -198,7 +198,7 @@ class BaseRoute(BaseModel):
         return False
     
     @lazyproperty
-    def gql(self) -> Type[BaseGraphQLQuery]:
+    def gql(self) -> BaseGraphQLQuery:
         return BaseGraphQLQuery(
             resource_name = self.api_resource
         )
@@ -208,7 +208,7 @@ class BaseRoute(BaseModel):
         resource_id: str, 
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Type[BaseResource]:
+    ) -> BaseResource:
         """
         GET a Single Resource
 
@@ -233,7 +233,7 @@ class BaseRoute(BaseModel):
         resource_id: str, 
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    )  -> Type[BaseResource]:
+    )  -> BaseResource:
         """
         GET a Single Resource
 
@@ -258,13 +258,13 @@ class BaseRoute(BaseModel):
         self, 
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
+    ) -> Dict[str, Union[List[BaseResource], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
         :param params: Optional Query Parameters
         
-        :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
+        :return: Dict[str, Union[List[BaseResource], Dict[str, Any]]]
         """
         api_response = self._send(
             method = 'GET',
@@ -282,13 +282,13 @@ class BaseRoute(BaseModel):
         self, 
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
+    ) -> Dict[str, Union[List[BaseResource], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
         :param params: Optional Query Parameters
 
-        :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
+        :return: Dict[str, Union[List[BaseResource], Dict[str, Any]]]
         """
         api_response = await self._async_send(
             method = 'GET',
@@ -307,7 +307,7 @@ class BaseRoute(BaseModel):
         resource_id: str, 
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Type[BaseResource]:
+    ) -> BaseResource:
         """
         GET a Single Resource
 
@@ -321,7 +321,7 @@ class BaseRoute(BaseModel):
         resource_id: str,
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Type[BaseResource]:
+    ) -> BaseResource:
         """
         GET a Single Resource
 
@@ -334,13 +334,13 @@ class BaseRoute(BaseModel):
         self,
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
+    ) -> Dict[str, Union[List[BaseResource], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
         :param params: Optional Query Parameters
 
-        :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
+        :return: Dict[str, Union[List[BaseResource], Dict[str, Any]]]
         """
         return self.find_all(params = params, **kwargs)
     
@@ -348,13 +348,13 @@ class BaseRoute(BaseModel):
         self,
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]:
+    ) -> Dict[str, Union[List[BaseResource], Dict[str, Any]]]:
         """
         GET all available objects of Resource
 
         :param params: Optional Query Parameters
         
-        :return: Dict[str, Union[List[Type[BaseResource]], Dict[str, Any]]]
+        :return: Dict[str, Union[List[BaseResource], Dict[str, Any]]]
         """
         return await self.async_find_all(params = params, **kwargs)    
 
@@ -405,7 +405,7 @@ class BaseRoute(BaseModel):
 
     def create(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         **kwargs
     ):
         """
@@ -437,7 +437,7 @@ class BaseRoute(BaseModel):
     
     async def async_create(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         **kwargs
     ):
         """
@@ -469,7 +469,7 @@ class BaseRoute(BaseModel):
     
     def batch_create(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         return_response: bool = False,
         **kwargs
     ):
@@ -503,7 +503,7 @@ class BaseRoute(BaseModel):
 
     async def async_batch_create(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         return_response: bool = False,
         **kwargs
     ):
@@ -538,7 +538,7 @@ class BaseRoute(BaseModel):
 
     def update(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         resource_id: str = None,
         **kwargs
     ):
@@ -576,7 +576,7 @@ class BaseRoute(BaseModel):
 
     async def async_update(
         self, 
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         resource_id: str = None,
         **kwargs
     ):
@@ -650,7 +650,7 @@ class BaseRoute(BaseModel):
     def upsert(
         self,
         resource_id: str,
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         update_existing: bool = False, 
         overwrite_existing: bool = False,
         **kwargs
@@ -680,7 +680,7 @@ class BaseRoute(BaseModel):
     async def async_upsert(
         self,
         resource_id: str,
-        input_object: Optional[Type[BaseResource]] = None,
+        input_object: Optional[BaseResource] = None,
         update_existing: bool = False, 
         overwrite_existing: bool = False,
         **kwargs
@@ -811,7 +811,7 @@ class BaseRoute(BaseModel):
         data: Dict,
         response_object: Optional[Type[BaseResource]] = None,
         **kwargs
-    ):
+    ) -> BaseResource:
         """
         Prepare the Response Object
         
