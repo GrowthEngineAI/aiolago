@@ -65,7 +65,7 @@ class BillableMetricRoute(BaseRoute):
         resource_id: str,
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Type[MetricGroupResponse]:
+    ) -> MetricGroupResponse:
         """
         Fetch all the groups for a given metric
         
@@ -92,7 +92,7 @@ class BillableMetricRoute(BaseRoute):
         resource_id: str,
         params: Optional[Dict[str, Any]] = None,
         **kwargs
-    ) -> Type[MetricGroupResponse]:
+    ) -> MetricGroupResponse:
         """
         Fetch all the groups for a given metric
         
