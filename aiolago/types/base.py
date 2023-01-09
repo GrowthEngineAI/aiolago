@@ -250,8 +250,9 @@ class BaseRoute(BaseModel):
             **kwargs
         )
         data = self.handle_response(api_response)
-        if data: data = data.json().get(self.root_name)
-        return self.prepare_response(data)
+        if data:
+            data = data.json().get(self.root_name)
+            return self.prepare_response(data)
 
     def find_all(
         self, 
